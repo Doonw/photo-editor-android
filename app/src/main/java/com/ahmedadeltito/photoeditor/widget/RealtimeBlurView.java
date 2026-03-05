@@ -339,11 +339,25 @@ public class RealtimeBlurView extends View {
 
     private static StopException STOP_EXCEPTION = new StopException();
 
+    //    static {
+//        try {
+//            // AndroidX 迁移后，v8 support 包被映射到了 androidx.renderscript
+//            RealtimeBlurView.class.getClassLoader().loadClass("androidx.renderscript.RenderScript");
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException("RenderScript support not enabled. Add \"android { defaultConfig { renderscriptSupportModeEnabled true }}\" in your build.gradle");
+//        }
+//    }
     static {
         try {
-            RealtimeBlurView.class.getClassLoader().loadClass("android.support.v8.renderscript.RenderScript");
+            // 尝试加载类本身，而不是用字符串。如果编译不过，说明依赖没配对。
+            Class.forName("androidx.renderscript.RenderScript");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("RenderScript support not enabled. Add \"android { defaultConfig { renderscriptSupportModeEnabled true }}\" in your build.gradle");
+            // 也可以尝试加载原生路径作为兜底
+            try {
+                Class.forName("android.renderscript.RenderScript");
+            } catch (ClassNotFoundException e2) {
+                throw new RuntimeException("RenderScript support not enabled...");
+            }
         }
     }
 
